@@ -1,3 +1,7 @@
+---
+import { sendEmail } from '../../contexts/backoffice/sendemail/service/sendemail';
+---
+
 <section class="py-16 sm:py-20">
   <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
     <div class="grid gap-12 lg:grid-cols-2 lg:gap-8">
@@ -7,14 +11,14 @@
           Nos encantaría saber más de ti y de lo que podemos construir juntos.
         </p>
       </div>
-      <form action="#" method="POST" class="mt-3 flex flex-col gap-y-6">
+      <form id="contactForm" class="mt-3 flex flex-col gap-y-6">
         <!-- Full name input -->
         <div>
-          <label for="full-name" class="sr-only">Full name</label>
+          <label for="name" class="sr-only">Full name</label>
           <input
             type="text"
             name="full-name"
-            id="full-name"
+            id="name"
             autocomplete="name"
             class="hover:ring-primary-600 focus:ring-primary-600 dark:hover:ring-primary-400 dark:focus:ring-primary-400 bg-primary-50 dark:bg-primary-950 ring-primary-900/40 dark:ring-primary-200/40 placeholder:text-primary-950/60 dark:placeholder:text-primary-200/60 block w-full appearance-none rounded-md border-0 px-4 py-4 text-base ring-1 transition focus:outline-none focus:ring-2"
             placeholder="Nombre completo"
@@ -34,6 +38,19 @@
           />
         </div>
 
+        <!-- Subject input -->
+        <div>
+          <label for="subject" class="sr-only">Subject</label>
+          <input
+            type="text"
+            name="subject"
+            id="subject"
+            autocomplete="name"
+            class="hover:ring-primary-600 focus:ring-primary-600 dark:hover:ring-primary-400 dark:focus:ring-primary-400 bg-primary-50 dark:bg-primary-950 ring-primary-900/40 dark:ring-primary-200/40 placeholder:text-primary-950/60 dark:placeholder:text-primary-200/60 block w-full appearance-none rounded-md border-0 px-4 py-4 text-base ring-1 transition focus:outline-none focus:ring-2"
+            placeholder="Asunto"
+          />
+        </div>
+
         <!-- Message textarea -->
         <div>
           <label for="message" class="sr-only">Message</label>
@@ -47,8 +64,9 @@
 
         <div>
           <button
+            id="submitButton"
             class="bg-primary-600 dark:bg-primary-400 hover:bg-primary-700 dark:hover:bg-primary-300 focus-visible:outline-primary-600 dark:focus-visible:outline-primary-400 dark:text-primary-950 inline-flex items-center justify-center rounded-full border border-transparent px-5 py-3 text-base font-medium text-white transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-            type="submit"
+            type="button"
           >
             Enviar
           </button>
@@ -57,3 +75,44 @@
     </div>
   </div>
 </section>
+
+<script>
+  import { sendEmail } from '../../contexts/backoffice/sendemail/service/sendemail';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('contactForm');
+    const submitButton = document.getElementById('submitButton');
+
+    if (!form || !submitButton) {
+      console.error('Form or submit button not found');
+      return;
+    }
+
+    submitButton.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      try {
+        const formData = new FormData(form as HTMLFormElement);
+        const data = {
+          name: formData.get('full-name') as string,
+          email: formData.get('email') as string,
+          subject: formData.get('subject') as string,
+          message: formData.get('message') as string
+        };
+
+        const success = await sendEmail(data);
+
+        if (success) {
+          alert('Mensaje enviado con éxito');
+          (form as HTMLFormElement).reset();
+        } else {
+          console.error('Failed to send email');
+          alert('Error al enviar el mensaje');
+        }
+      } catch (error) {
+        console.error('Error in form submission:', error);
+        alert('Error al procesar el formulario');
+      }
+    });
+  });
+</script>
